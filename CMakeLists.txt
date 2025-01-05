@@ -33,4 +33,5 @@ target_link_libraries(project
         ${OPENGL_LIBRARY}
         glfw
         glad
+        assimp
 )

@@ -39,9 +39,9 @@
 #include <vector>
 
 
-#if defined(_WIN32)
-#  pragma warning( disable: 4251)
-#endif
+// #if defined(_WIN32)
+// #  pragma warning( disable: 4251)
+// #endif
 namespace p2t {
 
 struct Edge;

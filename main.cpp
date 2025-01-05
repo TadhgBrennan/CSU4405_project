@@ -135,13 +135,13 @@ int main()
     };
     float planeVertices[] = {
         // positions          // texture coords
-        -50.0f,  0.0f, -50.0f,  0.0f, 0.0f,
-         50.0f,  0.0f, -50.0f,  1.0f, 0.0f,
-         50.0f,  0.0f,  50.0f,  1.0f, 1.0f,
+        -30.0f,  0.0f, -30.0f,  0.0f, 0.0f,
+         30.0f,  0.0f, -30.0f,  1.0f, 0.0f,
+         30.0f,  0.0f,  30.0f,  1.0f, 1.0f,
 
-         50.0f,  0.0f,  50.0f,  1.0f, 1.0f,
-        -50.0f,  0.0f,  50.0f,  0.0f, 1.0f,
-        -50.0f,  0.0f, -50.0f,  0.0f, 0.0f,
+         30.0f,  0.0f,  30.0f,  1.0f, 1.0f,
+        -30.0f,  0.0f,  30.0f,  0.0f, 1.0f,
+        -30.0f,  0.0f, -30.0f,  0.0f, 0.0f,
     };
     float skyboxVertices[] = {
         // positions
@@ -223,7 +223,7 @@ int main()
 
     // load textures
     // -------------
-    unsigned int cubeTexture = loadTexture("../container.jpg");
+    unsigned int treeTexture = loadTexture("../tree/diffuse.png");
     unsigned int groundTexture = loadTexture("../ground.jpg");
 
     vector<std::string> faces
@@ -237,6 +237,8 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
+
+
     // shader configuration
     // --------------------
     shader.use();
@@ -244,6 +246,9 @@ int main()
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
+
+    Model treeModel("../tree/DeadTree_LoPoly.obj");
+
 
     // render loop
     // -----------
@@ -255,7 +260,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         glm::vec2 currentPos(camera.Position.x, camera.Position.z);
-        deltaPos = currentPos - lastPos;
+        deltaPos = glm::mix(deltaPos, currentPos - lastPos, 0.1f);
         lastPos = currentPos;
 
         // input
@@ -272,18 +277,21 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 30.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.02f));
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         // cubes
-        glBindVertexArray(cubeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        // glBindVertexArray(cubeVAO);
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glBindVertexArray(0);
+        treeModel.Draw(shader);
 
         planeShader.use();
-        model = glm::translate(model, glm::vec3(0.0f,-0.5f,0.0f));
+        model = glm::mat4(1.0f);
         planeShader.setVec2("position", deltaPos);
         planeShader.setMat4("model", model);
         planeShader.setMat4("view", view);

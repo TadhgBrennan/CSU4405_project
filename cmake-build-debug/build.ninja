@@ -47,19 +47,19 @@ cmake_ninja_workdir = C$:/Users/Admin/Documents/College/Year4/graphics/project/c
 #############################################
 # Order-only phony target for project
 
-build cmake_object_order_depends_target_project: phony || cmake_object_order_depends_target_glad cmake_object_order_depends_target_glfw
+build cmake_object_order_depends_target_project: phony || cmake_object_order_depends_target_assimp cmake_object_order_depends_target_glad cmake_object_order_depends_target_glfw cmake_object_order_depends_target_zlibstatic
 
 build CMakeFiles/project.dir/main.cpp.obj: CXX_COMPILER__project_unscanned_Debug C$:/Users/Admin/Documents/College/Year4/graphics/project/main.cpp || cmake_object_order_depends_target_project
   DEP_FILE = CMakeFiles\project.dir\main.cpp.obj.d
   FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glfw-3.1.2/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glm-0.9.7.1 -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-opengl-3.3/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glew-2.1.0/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/assimp-master/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external -IC:/Users/Admin/Documents/College/Year4/graphics/project/render -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-3.3/include
+  INCLUDES = -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glfw-3.1.2/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glm-0.9.7.1 -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-opengl-3.3/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glew-2.1.0/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/assimp-master/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external -IC:/Users/Admin/Documents/College/Year4/graphics/project/render -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-3.3/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/assimp-master/code/../include -IC:/Users/Admin/Documents/College/Year4/graphics/project/cmake-build-debug/external/assimp-master/code/../include
   OBJECT_DIR = CMakeFiles\project.dir
   OBJECT_FILE_DIR = CMakeFiles\project.dir
 
 build CMakeFiles/project.dir/render/shader.cpp.obj: CXX_COMPILER__project_unscanned_Debug C$:/Users/Admin/Documents/College/Year4/graphics/project/render/shader.cpp || cmake_object_order_depends_target_project
   DEP_FILE = CMakeFiles\project.dir\render\shader.cpp.obj.d
   FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glfw-3.1.2/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glm-0.9.7.1 -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-opengl-3.3/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glew-2.1.0/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/assimp-master/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external -IC:/Users/Admin/Documents/College/Year4/graphics/project/render -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-3.3/include
+  INCLUDES = -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glfw-3.1.2/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glm-0.9.7.1 -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-opengl-3.3/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glew-2.1.0/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/assimp-master/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external -IC:/Users/Admin/Documents/College/Year4/graphics/project/render -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/glad-3.3/include -IC:/Users/Admin/Documents/College/Year4/graphics/project/external/assimp-master/code/../include -IC:/Users/Admin/Documents/College/Year4/graphics/project/cmake-build-debug/external/assimp-master/code/../include
   OBJECT_DIR = CMakeFiles\project.dir
   OBJECT_FILE_DIR = CMakeFiles\project.dir\render
 
@@ -71,9 +71,9 @@ build CMakeFiles/project.dir/render/shader.cpp.obj: CXX_COMPILER__project_unscan
 #############################################
 # Link the executable project.exe
 
-build project.exe: CXX_EXECUTABLE_LINKER__project_Debug CMakeFiles/project.dir/main.cpp.obj CMakeFiles/project.dir/render/shader.cpp.obj | glfw3ddll.a libgladd.dll.a || glfw3d.dll libgladd.dll
+build project.exe: CXX_EXECUTABLE_LINKER__project_Debug CMakeFiles/project.dir/main.cpp.obj CMakeFiles/project.dir/render/shader.cpp.obj | glfw3ddll.a libgladd.dll.a libassimpd.dll.a libzlibstaticd.a || glfw3d.dll libassimp-5d.dll libgladd.dll libzlibstaticd.a
   FLAGS = -g
-  LINK_LIBRARIES = -lopengl32  -lglu32  glfw3ddll.a  libgladd.dll.a  -lopengl32  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = -lopengl32  -lglu32  glfw3ddll.a  libgladd.dll.a  libassimpd.dll.a  -lopengl32  libzlibstaticd.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\project.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
