@@ -15,6 +15,8 @@
 #include <iostream>
 #include <random>
 
+#include "assimp-master/code/AssetLib/glTF2/glTF2Exporter.h"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -43,7 +45,7 @@ glm::vec2 deltaPos = glm::vec2(0.0, 0.0);
 // Settings for tree grid
 const float gridSize = 50.0f;      // Size of visible grid
 const float treeSpacing = 5.0f;   // Distance between trees
-const float renderDistance = 30.0f; // Max distance to render trees
+const float renderDistance = 20.0f; // Max distance to render trees
 
 int main()
 {
@@ -98,13 +100,13 @@ int main()
     // ------------------------------------------------------------------
     float planeVertices[] = {
         // positions          // texture coords
-        -30.0f,  0.0f, -30.0f,  0.0f, 0.0f,
-         30.0f,  0.0f, -30.0f,  1.0f, 0.0f,
-         30.0f,  0.0f,  30.0f,  1.0f, 1.0f,
+        -200.0f,  0.0f, -200.0f,  0.0f, 0.0f,
+         200.0f,  0.0f, -200.0f,  1.0f, 0.0f,
+         200.0f,  0.0f,  200.0f,  1.0f, 1.0f,
 
-         30.0f,  0.0f,  30.0f,  1.0f, 1.0f,
-        -30.0f,  0.0f,  30.0f,  0.0f, 1.0f,
-        -30.0f,  0.0f, -30.0f,  0.0f, 0.0f,
+         200.0f,  0.0f,  200.0f,  1.0f, 1.0f,
+        -200.0f,  0.0f,  200.0f,  0.0f, 1.0f,
+        -200.0f,  0.0f, -200.0f,  0.0f, 0.0f,
     };
     float skyboxVertices[] = {
         // positions
@@ -174,7 +176,7 @@ int main()
 
     // load textures
     // -------------
-    unsigned int treeTexture = loadTexture("../tree/diffuse.png");
+    unsigned int circleTexture = loadTexture("../gradient.png");
     unsigned int groundTexture = loadTexture("../ground.jpg");
 
     vector<std::string> faces
@@ -302,6 +304,9 @@ int main()
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         shader.setInt("texture_diffuse1", 0);
+        shader.setInt("texture1", 0); // Assuming your texture is bound to GL_TEXTURE0
+        shader.setVec3("emissiveColor", glm::vec3(0.07f, 1.0f, 0.05f)); // Blue glow
+        shader.setFloat("emissiveStrength", 0.1f);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, treeModel.textures_loaded[0].id);
         for (unsigned int i = 0; i < treeModel.meshes.size(); i++) {
@@ -317,6 +322,10 @@ int main()
         planeShader.setMat4("model", model);
         planeShader.setMat4("view", view);
         planeShader.setMat4("projection", projection);
+        planeShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        planeShader.setVec3("lightColor", 0.6f, 1.0f, 0.6f);
+        planeShader.setVec3("lightPos", glm::vec3(cameraPos.x, cameraPos.y, cameraPos.z));
+        planeShader.setVec3("viewPos", camera.Position);
 
         glBindVertexArray(planeVAO);
         glActiveTexture(GL_TEXTURE0);
