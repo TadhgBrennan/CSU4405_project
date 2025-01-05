@@ -45,6 +45,6 @@ CMake Deprecation Warning at external/glfw-3.1.2/CMakeLists.txt:8 (cmake_policy)
 -- Enabled exporter formats: OBJ OPENGEX PLY 3DS ASSBIN ASSXML COLLADA FBX STL X X3D GLTF 3MF PBRT ASSJSON STEP
 -- Disabled exporter formats:
 -- Treating all warnings as errors (for assimp library only)
--- Configuring done (1.2s)
--- Generating done (0.3s)
+-- Configuring done (0.6s)
+-- Generating done (0.2s)
 -- Build files have been written to: C:/Users/Admin/Documents/College/Year4/graphics/project/cmake-build-debug

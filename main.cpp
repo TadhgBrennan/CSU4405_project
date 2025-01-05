@@ -13,6 +13,7 @@
 
 
 #include <iostream>
+#include <random>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -21,6 +22,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 unsigned int loadCubemap(vector<std::string> faces);
+float getRandomOffset(int seed, float range);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -37,6 +39,11 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 glm::vec2 lastPos(0.0f, 0.0f);
 glm::vec2 deltaPos = glm::vec2(0.0, 0.0);
+
+// Settings for tree grid
+const float gridSize = 50.0f;      // Size of visible grid
+const float treeSpacing = 5.0f;   // Distance between trees
+const float renderDistance = 30.0f; // Max distance to render trees
 
 int main()
 {
@@ -89,50 +96,6 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float cubeVertices[] = {
-        // positions          // texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
     float planeVertices[] = {
         // positions          // texture coords
         -30.0f,  0.0f, -30.0f,  0.0f, 0.0f,
@@ -188,18 +151,6 @@ int main()
          1.0f, -1.0f,  1.0f
     };
 
-    // cube VAO
-    unsigned int cubeVAO, cubeVBO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    //planeVAO
     unsigned int planeVAO, planeVBO;
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
@@ -250,6 +201,38 @@ int main()
     Model treeModel("../tree/DeadTree_LoPoly.obj");
 
 
+    // configure instanced array
+    // -------------------------
+    unsigned int buffer;
+    glGenBuffers(1, &buffer);
+    // Configure instance buffer for tree model
+    for (unsigned int i = 0; i < treeModel.meshes.size(); i++) {
+        unsigned int VAO = treeModel.meshes[i].VAO;
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * 1000, nullptr, GL_DYNAMIC_DRAW); // Allocate space for instance data
+
+        // Set instance matrix attributes
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
+
+
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -259,9 +242,6 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        glm::vec2 currentPos(camera.Position.x, camera.Position.z);
-        deltaPos = glm::mix(deltaPos, currentPos - lastPos, 0.1f);
-        lastPos = currentPos;
 
         // input
         // -----
@@ -272,27 +252,68 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Generate tree models
+        glm::vec3 cameraPos = camera.Position;
+
+        // Determine the grid origin based on the camera's position
+        float gridOriginX = std::floor(cameraPos.x / treeSpacing) * treeSpacing;
+        float gridOriginZ = std::floor(cameraPos.z / treeSpacing) * treeSpacing;
+
+        int gridRadius = static_cast<int>(gridSize / 2 / treeSpacing);
+        std::vector<glm::mat4> treeModels;
+
+        for (int x = -gridRadius; x <= gridRadius; ++x) {
+            for (int z = -gridRadius; z <= gridRadius; ++z) {
+                float worldX = gridOriginX + x * treeSpacing;
+                float worldZ = gridOriginZ + z * treeSpacing;
+
+                // Add randomness to tree positions
+                int seedX = static_cast<int>(worldX * 1000); // Unique seed for X offset
+                int seedZ = static_cast<int>(worldZ * 1000); // Unique seed for Z offset
+                float offsetX = getRandomOffset(seedX, treeSpacing * 0.5f);
+                float offsetZ = getRandomOffset(seedZ, treeSpacing * 0.5f);
+
+                worldX += offsetX;
+                worldZ += offsetZ;
+
+                // Distance check
+                if (glm::distance(glm::vec3(worldX, 0.0f, worldZ), cameraPos) > renderDistance)
+                    continue;
+
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(worldX, 0.0f, worldZ));
+                model = glm::scale(model, glm::vec3(0.02f));
+                treeModels.push_back(model);
+            }
+        }
+
+
+        // Update instance buffer
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ARRAY_BUFFER, treeModels.size() * sizeof(glm::mat4), &treeModels[0], GL_DYNAMIC_DRAW);
+
         // draw scene as normal
         shader.use();
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 30.0f);
         //model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.02f));
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-        // cubes
-        // glBindVertexArray(cubeVAO);
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, cubeTexture);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        // glBindVertexArray(0);
-        treeModel.Draw(shader);
+        shader.setInt("texture_diffuse1", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, treeModel.textures_loaded[0].id);
+        for (unsigned int i = 0; i < treeModel.meshes.size(); i++) {
+            glBindVertexArray(treeModel.meshes[i].VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(treeModel.meshes[i].indices.size()), GL_UNSIGNED_INT, 0, treeModels.size());
+        }
+        //treeModel.Draw(shader);
 
         planeShader.use();
         model = glm::mat4(1.0f);
-        planeShader.setVec2("position", deltaPos);
+        model = glm::translate(model, glm::vec3(camera.Position.x, 0.0f, camera.Position.z));
+        planeShader.setVec2("position", cameraPos.x, cameraPos.z);
         planeShader.setMat4("model", model);
         planeShader.setMat4("view", view);
         planeShader.setMat4("projection", projection);
@@ -325,9 +346,7 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &cubeVAO);
     glDeleteVertexArrays(1, &skyboxVAO);
-    glDeleteBuffers(1, &cubeVBO);
     glDeleteBuffers(1, &skyboxVBO);
 
     glfwTerminate();
@@ -466,4 +485,11 @@ unsigned int loadCubemap(vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
+// Function to generate a consistent random number for a given seed
+float getRandomOffset(int seed, float range) {
+    std::mt19937 generator(seed); // Seeded random number generator
+    std::uniform_real_distribution<float> distribution(-range, range);
+    return distribution(generator);
 }
